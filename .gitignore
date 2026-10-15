@@ -42,3 +42,7 @@ next-env.d.ts
 
 # 本機設定（含 Meta 權杖）
 /data/settings.json
+
+# Cloudflare / OpenNext
+/.open-next/
+/.wrangler/

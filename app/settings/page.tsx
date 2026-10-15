@@ -66,8 +66,8 @@ export default function SettingsPage() {
 
       {s.readOnlyStore && (
         <div className="card p-3 text-sm text-serious border-serious/40">
-          這個部署環境（Vercel）的檔案系統是唯讀的：這裡儲存的設定只會保留到伺服器實例重啟。
-          要長期使用，請到 Vercel 專案的 Environment Variables 設定 META_ACCESS_TOKEN 與 META_AD_ACCOUNT_ID，然後重新部署。
+          這個部署環境的檔案系統是唯讀的：這裡儲存的設定只會保留到伺服器實例重啟。
+          要長期使用，請在部署平台（Cloudflare Workers 的 Secrets 或 Vercel 的 Environment Variables）設定 META_ACCESS_TOKEN 與 META_AD_ACCOUNT_ID，然後重新部署。
         </div>
       )}
 

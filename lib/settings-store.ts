@@ -12,7 +12,7 @@ const FILE = path.join(DATA_DIR, "settings.json");
 /** 檔案系統唯讀時（例如 Vercel）改存在記憶體，實例重啟後會消失 */
 let memoryStore: Partial<Settings> | null = null;
 
-export const isReadOnlyStore = Boolean(process.env.VERCEL);
+export const isReadOnlyStore = Boolean(process.env.VERCEL || process.env.READ_ONLY_SETTINGS);
 
 export async function readSettings(): Promise<Settings> {
   let fromFile: Partial<Settings> = {};
