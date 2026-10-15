@@ -29,6 +29,26 @@ npm run dev
 2. 到「設定」頁貼上權杖、填廣告帳戶 ID（純數字）、關掉「使用示範資料」、按「測試 Meta 連線」。
 3. 權杖只存在伺服器端的 `data/settings.json`（已在 `.gitignore`），不會傳到瀏覽器。
 
+## 部署到 Cloudflare Workers
+
+目前的正式網址：https://meta-ads-roas-dashboard.xboomz.workers.dev
+
+```bash
+export CLOUDFLARE_API_TOKEN=...   # 或先 npx wrangler login
+npm run deploy                     # OpenNext build + wrangler deploy
+```
+
+Workers 上沒有可寫的檔案系統，設定頁的儲存只會保留到實例重啟。要長期使用請設 secrets：
+
+```bash
+npx wrangler secret put META_ACCESS_TOKEN
+npx wrangler secret put META_AD_ACCOUNT_ID
+npx wrangler secret put DASHBOARD_PASSWORD   # 設了之後整站需要密碼（帳號隨意）
+npx wrangler secret put ANTHROPIC_API_KEY    # 選填，啟用 AI 建議
+```
+
+設定 secrets 後要再 `npm run deploy` 一次。也可以在 Cloudflare 後台 Workers & Pages → meta-ads-roas-dashboard → Settings → Variables and Secrets 裡設定。
+
 ## 專案結構
 
 ```
