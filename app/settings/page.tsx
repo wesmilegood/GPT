@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import type { Settings } from "@/lib/types";
 
-type Masked = Settings & { hasToken: boolean; hasAnthropicKey: boolean };
+type Masked = Settings & { hasToken: boolean; hasAnthropicKey: boolean; readOnlyStore: boolean };
 
 export default function SettingsPage() {
   const [s, setS] = useState<Masked | null>(null);
@@ -63,6 +63,13 @@ export default function SettingsPage() {
           這裡的數值會直接影響儀表板的建議。先把目標 ROAS 與毛利率填對，建議才會準。
         </p>
       </div>
+
+      {s.readOnlyStore && (
+        <div className="card p-3 text-sm text-serious border-serious/40">
+          這個部署環境（Vercel）的檔案系統是唯讀的：這裡儲存的設定只會保留到伺服器實例重啟。
+          要長期使用，請到 Vercel 專案的 Environment Variables 設定 META_ACCESS_TOKEN 與 META_AD_ACCOUNT_ID，然後重新部署。
+        </div>
+      )}
 
       {msg && (
         <div className={`card p-3 text-sm ${msg.ok ? "text-good-text" : "text-critical"}`}>{msg.text}</div>

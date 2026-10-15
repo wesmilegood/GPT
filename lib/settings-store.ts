@@ -9,13 +9,22 @@ const FILE = path.join(DATA_DIR, "settings.json");
  * 設定存在 data/settings.json（已加入 .gitignore）。
  * 環境變數 META_ACCESS_TOKEN / META_AD_ACCOUNT_ID 會在檔案沒填時當作後備。
  */
+/** 檔案系統唯讀時（例如 Vercel）改存在記憶體，實例重啟後會消失 */
+let memoryStore: Partial<Settings> | null = null;
+
+export const isReadOnlyStore = Boolean(process.env.VERCEL);
+
 export async function readSettings(): Promise<Settings> {
   let fromFile: Partial<Settings> = {};
-  try {
-    const raw = await fs.readFile(FILE, "utf8");
-    fromFile = JSON.parse(raw) as Partial<Settings>;
-  } catch {
-    // 檔案不存在就用預設
+  if (memoryStore) {
+    fromFile = memoryStore;
+  } else {
+    try {
+      const raw = await fs.readFile(FILE, "utf8");
+      fromFile = JSON.parse(raw) as Partial<Settings>;
+    } catch {
+      // 檔案不存在就用預設
+    }
   }
   const merged: Settings = { ...DEFAULT_SETTINGS, ...fromFile };
   if (!merged.metaAccessToken && process.env.META_ACCESS_TOKEN) {
@@ -30,8 +39,16 @@ export async function readSettings(): Promise<Settings> {
 export async function writeSettings(patch: Partial<Settings>): Promise<Settings> {
   const current = await readSettings();
   const next: Settings = { ...current, ...sanitize(patch) };
-  await fs.mkdir(DATA_DIR, { recursive: true });
-  await fs.writeFile(FILE, JSON.stringify(next, null, 2), "utf8");
+  if (isReadOnlyStore) {
+    memoryStore = next;
+    return next;
+  }
+  try {
+    await fs.mkdir(DATA_DIR, { recursive: true });
+    await fs.writeFile(FILE, JSON.stringify(next, null, 2), "utf8");
+  } catch {
+    memoryStore = next;
+  }
   return next;
 }
 
@@ -62,12 +79,15 @@ function sanitize(patch: Partial<Settings>): Partial<Settings> {
 }
 
 /** 回傳給前端時遮罩權杖 */
-export function maskSettings(s: Settings): Settings & { hasToken: boolean; hasAnthropicKey: boolean } {
+export function maskSettings(
+  s: Settings,
+): Settings & { hasToken: boolean; hasAnthropicKey: boolean; readOnlyStore: boolean } {
   const t = s.metaAccessToken;
   return {
     ...s,
     metaAccessToken: t ? `${t.slice(0, 6)}…${t.slice(-4)}` : "",
     hasToken: Boolean(t),
     hasAnthropicKey: Boolean(process.env.ANTHROPIC_API_KEY),
+    readOnlyStore: isReadOnlyStore,
   };
 }
