@@ -27,11 +27,24 @@ export async function readSettings(): Promise<Settings> {
     }
   }
   const merged: Settings = { ...DEFAULT_SETTINGS, ...fromFile };
+  let envCredentials = false;
   if (!merged.metaAccessToken && process.env.META_ACCESS_TOKEN) {
     merged.metaAccessToken = process.env.META_ACCESS_TOKEN;
+    envCredentials = true;
   }
   if (!merged.adAccountId && process.env.META_AD_ACCOUNT_ID) {
     merged.adAccountId = process.env.META_AD_ACCOUNT_ID.replace(/^act_/, "");
+  }
+  // 部署環境（唯讀設定）只要透過環境變數拿到權杖與帳戶 ID，就直接用真實資料；
+  // 除非 settings.json 或 DEMO_MODE=1 明確要求示範模式。
+  const demoForced = process.env.DEMO_MODE === "1";
+  if (
+    typeof fromFile.demoMode !== "boolean" &&
+    envCredentials &&
+    merged.adAccountId &&
+    !demoForced
+  ) {
+    merged.demoMode = false;
   }
   return merged;
 }
