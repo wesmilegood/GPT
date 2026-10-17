@@ -10,6 +10,7 @@
   },
   "observability": { "enabled": true },
   "vars": {
-    "READ_ONLY_SETTINGS": "1"
+    "READ_ONLY_SETTINGS": "1",
+    "META_AD_ACCOUNT_ID": "976421539778909"
   }
 }
